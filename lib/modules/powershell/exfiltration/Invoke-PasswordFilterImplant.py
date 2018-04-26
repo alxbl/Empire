@@ -14,7 +14,7 @@ class Module:
             'Author': ['@Le-non', '@DorethZ10'],
 
 
-            'Description': ('Installs a malicious password filter on the DC that performs username and password exfiltration via DNS. The data is exfiltrated in the format requestnumber.data.domain.com. The data is the hex result of "username:password" XORed with the key.'),
+            'Description': ('Installs a malicious password filter (x64 ONLY) on the DC that performs username and password exfiltration via DNS. The data is exfiltrated in the format requestnumber.data.domain.com. The data is the hex result of "username:password" XORed with the key. Note: this module will only work on x64 systems.'),
 
 
             'Background': False,
