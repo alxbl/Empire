@@ -50,9 +50,9 @@ class Module:
                 'Value'         :   '31337'
             },
         'DomainValue' : {
-                'Description'   :   'DNS Domain to exfill the data',
+                'Description'   :   'DNS Domain to exfill the data. MUST start with a \'.\'',
                 'Required'      :   True,
-                'Value'         :   'example.com'
+                'Value'         :   '.example.com'
             },
 		'DllName' : {
                 'Description'   :   'File name of the password filter. (Excluding the ".dll" file extension)',
@@ -65,7 +65,7 @@ class Module:
                 'Value'         :   'C:\Windows\System32'
             },	
 		'Cleanup' : {
-                'Description'   :   'Cleanup the trigger and any script from specified location.',
+                'Description'   :   'Cleanup the trigger and any script from specified location. Note: the DLL will stay on the disk. The registry keys will be cleared so it won\'t load  anymore.',
                 'Required'      :   False,
                 'Value'         :   ''
             }
