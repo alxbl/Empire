@@ -46,7 +46,7 @@ class Module:
                 'Value'         :   'C:\Windows\System32'
             },
         'Cleanup' : {
-                'Description'   :   'Cleanup the trigger and any script from specified location. Note: the DLL will stay on the disk. The registry keys will be cleared so it won\'t load  anymore.',
+                'Description'   :   'Cleanup the trigger and any script from specified location.',
                 'Required'      :   False,
                 'Value'         :   ''
             }
