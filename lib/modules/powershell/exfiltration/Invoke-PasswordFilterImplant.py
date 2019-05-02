@@ -10,7 +10,7 @@ class Module:
         self.info = {
             'Name': 'Invoke-PasswordFilterImplant',
             'Author': ['@Le-non', '@DorethZ10', '@alxbl'],
-            'Description': ('Installs a malicious password filter (x64 ONLY) on the DC that performs username and password exfiltration via DNS. The data is exfiltrated in the format requestnumber.data.domain.com. The data is the hex result of "username:password" XORed with the key. Note: this module will only work on x64 systems.'),
+            'Description': ('Installs a password filter on a DC that exfiltrates user credentials via DNS. The data is exfiltrated in the format requestnumber.data.domain.com. The data is the string "username:password" encrypted with the given public key.'),
             'Background': False,
             'OutputExtension': None,
             'NeedsAdmin': True,
@@ -85,7 +85,8 @@ class Module:
             except:
                 print helpers.color("[!] Failed to parse public key file at: " + str(key))
                 return ""
-            pubkey = ''.join(pubkey.split('\n')[1:-1])
+            pubkey = ''.join(pubkey.strip().split('\n')[1:-1])
+            print helpers.color("[*] KEY: " + str(pubkey))
 
         moduleCode = f.read()
         f.close()
