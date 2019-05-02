@@ -47,8 +47,8 @@ class Module:
             },
         'RebootNow': {
                 'Description'   :   'Reboot the domain controller immediately.',
-                'Required'      :   True,
-                'Value'         :   'False'
+                'Required'      :   False,
+                'Value'         :   ''
         },
         'Cleanup' : {
                 'Description'   :   'Cleanup the trigger and any script from specified location. Note: Due to technical limitations, the dropped implant must be deleted manually after the DC has restarted.',
@@ -116,5 +116,6 @@ class Module:
         if obfuscate:
             scriptEnd = helpers.obfuscate(psScript=scriptEnd, installPath=self.mainMenu.installPath, obfuscationCommand=obfuscationCommand)
         script += scriptEnd
+
         return script
 
