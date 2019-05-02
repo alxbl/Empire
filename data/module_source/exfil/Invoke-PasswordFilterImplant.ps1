@@ -100,7 +100,7 @@ deploying the implant.
             Set-ItemProperty $registryPath $NotificationPackagesName -value ($notifPackagesValues -ne $DLLName) -Type MultiString
 
             # FIXME: DLL Cannot be removed without a restart
-            Remove-Item "$DLLPath\$DLLName"
+            Remove-Item "$DLLPath\$DLLName.dll"
         }
 
         Remove-ItemProperty -Path $registryPath -Name $DomainName -ErrorAction SilentlyContinue
