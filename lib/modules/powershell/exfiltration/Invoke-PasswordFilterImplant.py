@@ -10,7 +10,7 @@ class Module:
         self.info = {
             'Name': 'Invoke-PasswordFilterImplant',
             'Author': ['@Le-non', '@DorethZ10', '@alxbl'],
-            'Description': ('Installs a password filter on a DC that exfiltrates user credentials via DNS. The data is exfiltrated in the format requestnumber.data.domain.com. The data is the string "username:password" encrypted with the given public key.'),
+            'Description': ('Installs a password filter on a DC that exfiltrates user credentials via DNS. The data is exfiltrated in the format requestnumber.data.domain.com. The data is the string "username:password" encrypted with the given public key. Requires a DC reboot.'),
             'Background': False,
             'OutputExtension': None,
             'NeedsAdmin': True,
@@ -30,7 +30,7 @@ class Module:
                 'Required'      :   True,
                 'Value'         :   ''
             },
-        'DomainValue' : {
+        'Domain' : {
                 'Description'   :   'DNS Domain to exfiltrate the data. MUST start with a \'.\'',
                 'Required'      :   True,
                 'Value'         :   '.example.com'
@@ -45,8 +45,13 @@ class Module:
                 'Required'      :   True,
                 'Value'         :   'C:\Windows\System32'
             },
+        'RebootNow': {
+                'Description'   :   'Reboot the domain controller immediately.',
+                'Required'      :   True,
+                'Value'         :   'False'
+        },
         'Cleanup' : {
-                'Description'   :   'Cleanup the trigger and any script from specified location.',
+                'Description'   :   'Cleanup the trigger and any script from specified location. Note: Due to technical limitations, the dropped implant must be deleted manually after the DC has restarted.',
                 'Required'      :   False,
                 'Value'         :   ''
             }
